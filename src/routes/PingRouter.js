@@ -4,7 +4,7 @@ const router=Router();
 
 router.get('/',(req,res)=>{
     
-    console.log("hi");
+    console.log("Ping Router");
     return res.json({
         message:'get request on ping made succesfully',
         code :'1234567'
@@ -12,7 +12,7 @@ router.get('/',(req,res)=>{
     
 });
 
-router.use('/desc',PingController);
+router.use('/test',PingController);
 
 export default router;
 

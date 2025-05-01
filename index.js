@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import PingRouter from './src/routes/PingRouter.js'
 import ProductRouter from './src/routes/Product.Router.js'
+import { Port } from './src/Config/Server.Config.js';
 
 const app = express();
 
@@ -22,8 +23,7 @@ app.use('/ping',PingRouter);
 app.use('/product',ProductRouter);
 
 
-app.listen(4000,()=>{
-    console.log(`server running on http://localhost:${4000}`);
-
+app.listen(Port,()=>{
+    console.log(`server running on http://localhost:${Port}`);
 })
 
