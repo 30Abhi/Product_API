@@ -1,5 +1,6 @@
 import ProductModel from "../Schema/ProductSchema.js";
 import { DeepseekService } from "../Service/DeepSeek.Service.js";
+import { DeepseekFAQService } from "../Service/DeepSeekFAQ.Service.js";
 
 
 export const ProductController = async (req, res) => {
@@ -23,21 +24,25 @@ export const ProductController = async (req, res) => {
             
             try {
                 console.log("PRODUCT BEING PROCESSED",current);
+
                 const response = await DeepseekService(current.name);
+                const FAQresponse = await DeepseekFAQService(current.name);
 
                 const itemUpdated=await ProductModel.findOneAndUpdate({
                     _id : current._id
                 },{
                     $set:{
                         aiDesc:response.description,
-                        aiSearchkeywords:response.synonyms
+                        aiSearchkeywords:response.synonyms,
+                        aiFAQS:FAQresponse.FAQs,
                     }
-                });
+                },
+                { new: true });
 
                 console.log("itemUpdated-->",itemUpdated);
 
 
-                results.push({ productName: current.name, aidescription:response.description,synonyms:response.synonyms });
+                results.push({ productName: current.name, aidescription:response.description,synonyms:response.synonyms,aiFAQs:FAQresponse.FAQs });
 
             } catch (err) {
                 throw new Error(err);
