@@ -22,10 +22,6 @@ export const DeepseekService = async (productName) => {
         {
           role: "user",
           content: `Provide me the description for ${productName} and synonyms for search engine `
-        },
-        {
-          role: "user",
-          content: `Provide me the FAQs for ${productName}  `
         }
       ],
       model: "deepseek-chat",
