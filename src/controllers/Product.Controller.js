@@ -1,6 +1,7 @@
 import ProductModel from "../Schema/ProductSchema.js";
 import { DeepseekService } from "../Service/DeepSeek.Service.js";
 
+
 export const ProductController = async (req, res) => {
 
     console.log("request made to Product controller");
@@ -17,32 +18,31 @@ export const ProductController = async (req, res) => {
     try {
         const results = [];
 
-        const batchSize = 5;
-        
+
         for (const current of productNamesAID) {
             
             try {
                 console.log("PRODUCT BEING PROCESSED",current);
-                const description = await DeepseekService(current.name);
+                const response = await DeepseekService(current.name);
 
                 const itemUpdated=await ProductModel.findOneAndUpdate({
                     _id : current._id
                 },{
                     $set:{
-                        aiDesc:description
+                        aiDesc:response.description,
+                        aiSearchkeywords:response.synonyms
                     }
                 });
 
-                console.log("itemUpdated",itemUpdated);
+                console.log("itemUpdated-->",itemUpdated);
 
-                results.push({ productName: current.name, description:description });
+
+                results.push({ productName: current.name, aidescription:response.description,synonyms:response.synonyms });
 
             } catch (err) {
                 throw new Error(err);
             }
         }
-
-        
 
         return res.json({
             status: "Success",

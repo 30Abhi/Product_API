@@ -24,7 +24,7 @@ export const DeepseekService=async (productName)=>{
                 },
                 { 
                   role: "user", 
-                  content: `Provide me the description for ${productName} ` 
+                  content: `Provide me the description for ${productName} and synonyms for search engine ` 
                 }
               ],
             model: "deepseek-chat",
@@ -47,11 +47,12 @@ const lastBrace  = raw.lastIndexOf('}');
 if (firstBrace !== -1 && lastBrace !== -1) {
   raw = raw.substring(firstBrace, lastBrace + 1);
 }
-
+    
 // 3. Parse
 let payload;
 try {
   payload = JSON.parse(raw);
+  // console.log(payload);
 } catch (err) {
   console.error("Could not parse JSON from DeepSeek response:", raw);
   throw new Error("DeepSeek returned invalid JSON");
@@ -61,7 +62,10 @@ try {
 if (!payload.description) {
   throw new Error("DeepSeek response missing `description` field");
 }
-return payload.description;
+if(!payload.synonyms){
+  throw new Error("DeepSeek response missing `search Keywords/synonyms` field");
+}
+return {description:payload.description,synonyms:payload.synonyms};
          
           
 
