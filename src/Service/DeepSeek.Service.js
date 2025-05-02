@@ -30,7 +30,7 @@ export const DeepseekService=async (productName)=>{
             model: "deepseek-chat",
           });
            
-          
+         
       // … after getting `raw` …
 let raw = response.choices[0].message.content;
 

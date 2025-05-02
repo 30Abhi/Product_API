@@ -1,10 +1,13 @@
+import ProductModel from "../Schema/ProductSchema.js";
 import { DeepseekService } from "../Service/DeepSeek.Service.js";
 
 export const ProductController = async (req, res) => {
+
     console.log("request made to Product controller");
 
-    const productNames = req.productNames;
-    if (!Array.isArray(productNames) || productNames.length === 0) {
+    const productNamesAID = req.productNamesAID;
+
+    if (!Array.isArray(productNamesAID) || productNamesAID.length === 0) {
         return res.status(400).json({
             status: "Unsuccess",
             message: "No products to process"
@@ -14,15 +17,28 @@ export const ProductController = async (req, res) => {
     try {
         const results = [];
 
-        for (const name of productNames) {
+        const batchSize = 5;
+        
+        for (const current of productNamesAID) {
             
             try {
-                console.log("PRODUCT BEING PROCESSED",name);
-                const description = await DeepseekService(name);
-                
-                results.push({ productName: name, description:description });
+                console.log("PRODUCT BEING PROCESSED",current);
+                const description = await DeepseekService(current.name);
+
+                const itemUpdated=await ProductModel.findOneAndUpdate({
+                    _id : current._id
+                },{
+                    $set:{
+                        aiDesc:description
+                    }
+                });
+
+                console.log("itemUpdated",itemUpdated);
+
+                results.push({ productName: current.name, description:description });
+
             } catch (err) {
-                results.push({ productName: name, error: err.message });
+                throw new Error(err);
             }
         }
 

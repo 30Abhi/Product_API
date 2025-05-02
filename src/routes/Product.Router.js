@@ -1,12 +1,12 @@
 import {Router} from 'express';
 import { ProductController } from '../controllers/Product.Controller.js';
-import multer from 'multer';
-import { csvParserMiddleware } from '../middlewares/csvParserMiddleware.js';
+
+import { productDBMiddleware } from '../middlewares/productDB.Middleware.js';
 
 
 const router=Router();
-const upload = multer({ dest: 'uploads/' });
 
-router.use('/',upload.single('file'),csvParserMiddleware,ProductController);
+
+router.use('/',productDBMiddleware,ProductController);
 
 export default router;
