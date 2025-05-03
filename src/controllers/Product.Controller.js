@@ -1,6 +1,8 @@
 import ProductModel from "../Schema/ProductSchema.js";
 import { DeepseekService } from "../Service/DeepSeek.Service.js";
 import { DeepseekFAQService } from "../Service/DeepSeekFAQ.Service.js";
+import { DeepseekNutritionService } from "../Service/DeepSeekNutritionalFact.Service.js";
+import { DeepSeekUseABenefitsService } from "../Service/DeepSeekUseABenefits.Service.js";
 
 
 export const ProductController = async (req, res) => {
@@ -27,6 +29,10 @@ export const ProductController = async (req, res) => {
 
                 const response = await DeepseekService(current.name);
                 const FAQresponse = await DeepseekFAQService(current.name);
+                const NutritonResponse=await DeepseekNutritionService(current.name);
+                const HowtoUseBenefitsResponse=await DeepSeekUseABenefitsService(current.name);
+
+                console.log("HowtoUseBenefitsResponse---->",HowtoUseBenefitsResponse);
 
                 const itemUpdated=await ProductModel.findOneAndUpdate({
                     _id : current._id
@@ -35,14 +41,24 @@ export const ProductController = async (req, res) => {
                         aiDesc:response.description,
                         aiSearchkeywords:response.synonyms,
                         aiFAQS:FAQresponse.FAQs,
+                        aiNutritionFacts:NutritonResponse?.nutritional_facts,
+                        aiUses:HowtoUseBenefitsResponse.uses,
+                        aiBenefits:HowtoUseBenefitsResponse.benefits
                     }
                 },
                 { new: true });
 
-                console.log("itemUpdated-->",itemUpdated);
+                // console.log("itemUpdated-->",itemUpdated);
 
 
-                results.push({ productName: current.name, aidescription:response.description,synonyms:response.synonyms,aiFAQs:FAQresponse.FAQs });
+                results.push({ 
+                    productName: current.name, 
+                    aidescription:response.description,
+                    synonyms:response.synonyms,aiFAQs:FAQresponse.FAQs,
+                    aiNutrition:NutritonResponse?.nutritionalFacts,
+                    aiUses:HowtoUseBenefitsResponse.uses,
+                    aiBenefits:HowtoUseBenefitsResponse.benefits
+                 });
 
             } catch (err) {
                 throw new Error(err);

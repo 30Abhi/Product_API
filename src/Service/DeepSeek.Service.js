@@ -41,6 +41,7 @@ export const DeepseekService = async (productName) => {
     //    before the first “{” and after the last “}”.
     const firstBrace = raw.indexOf('{');
     const lastBrace = raw.lastIndexOf('}');
+    
     if (firstBrace !== -1 && lastBrace !== -1) {
       raw = raw.substring(firstBrace, lastBrace + 1);
     }
