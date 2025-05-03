@@ -14,7 +14,14 @@ const productSchema = new Schema({
     },
     _name: { type: String, lowercase: true },
     description: { type: String },
+
     aiDesc: { type: String, default: null },
+    aiSearchkeywords: { type: [String], default: [] },
+    aiFAQS: { type: [Object], default: [] },
+    aiUses: { type: String, default: null },
+    aiBenefits: { type: String, default: null },
+    aiNutritionFacts: { type: [Object], default: [] },
+
     lDescription: { type: String, lowercase: true },
     shortDesc: { type: String },
     lShortDesc: { type: String, lowercase: true },

@@ -38,7 +38,7 @@ export const DeepseekNutritionService = async (productName) => {
     console.log("Nutrition PayLoad--->",payload);
 
 
-    return  payload ;
+    return  {nutritional_facts:payload} ;
   } catch (err) {
     console.error("DeepseekNutritionService Error:", err);
     throw new Error("Failed to fetch product nutritional information");

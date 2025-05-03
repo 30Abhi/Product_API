@@ -5,10 +5,10 @@ export const productDBMiddleware = async (req, res, next) => {
   try {
     // Fetch first 2 products where aiDesc is null or does not exist
     await MongoConfig();
-    
+
     const products = await ProductModel.find(
-      { $or: [{ aiDesc: null }, { aiDesc: { $exists: false } }] }, 
-      { name: 1, _id: 1 }// Projection 
+      {}, 
+      {}
     )
       .limit(2); 
 

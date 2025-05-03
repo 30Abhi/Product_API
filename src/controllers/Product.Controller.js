@@ -1,78 +1,122 @@
 import ProductModel from "../Schema/ProductSchema.js";
-import { DeepseekService } from "../Service/DeepSeek.Service.js";
+import { DeepseekDescriptionService } from "../Service/DeepSeek.Service.js";
+import { DeepSeekBenefitsService } from "../Service/DeepSeekBenefits.Service.js";
 import { DeepseekFAQService } from "../Service/DeepSeekFAQ.Service.js";
 import { DeepseekNutritionService } from "../Service/DeepSeekNutritionalFact.Service.js";
-import { DeepSeekUseABenefitsService } from "../Service/DeepSeekUseABenefits.Service.js";
-
+import { DeepseekSynonymsService } from "../Service/DeepseekSynonymsService.js";
+import { DeepSeekUsesService } from "../Service/DeepSeekUses.Service.js";
 
 export const ProductController = async (req, res) => {
 
-    console.log("request made to Product controller");
+    console.log("Request made to Product controller");
 
     const productNamesAID = req.productNamesAID;
 
     if (!Array.isArray(productNamesAID) || productNamesAID.length === 0) {
         return res.status(400).json({
             status: "Unsuccess",
-            message: "No products to process"
+            message: "No products to process",
         });
     }
 
     try {
+
         const results = [];
 
-
         for (const current of productNamesAID) {
-            
             try {
-                console.log("PRODUCT BEING PROCESSED",current);
+                console.log("PRODUCT BEING PROCESSED", current);
 
-                const response = await DeepseekService(current.name);
-                const FAQresponse = await DeepseekFAQService(current.name);
-                const NutritonResponse=await DeepseekNutritionService(current.name);
-                const HowtoUseBenefitsResponse=await DeepSeekUseABenefitsService(current.name);
+                let changes = {}; // Initialize changes object for the current product
 
-                console.log("HowtoUseBenefitsResponse---->",HowtoUseBenefitsResponse);
+                if (!current.aiDesc) {
+                    const Descriptionresponse = await DeepseekDescriptionService(current.name);
+                    await ProductModel.findOneAndUpdate(
+                        { _id: current._id },
+                        { $set: { aiDesc: Descriptionresponse.description } },
+                        { new: true }
+                    );
+                    changes.aiDesc = Descriptionresponse.description;
+                }
 
-                const itemUpdated=await ProductModel.findOneAndUpdate({
-                    _id : current._id
-                },{
-                    $set:{
-                        aiDesc:response.description,
-                        aiSearchkeywords:response.synonyms,
-                        aiFAQS:FAQresponse.FAQs,
-                        aiNutritionFacts:NutritonResponse?.nutritional_facts,
-                        aiUses:HowtoUseBenefitsResponse.uses,
-                        aiBenefits:HowtoUseBenefitsResponse.benefits
-                    }
-                },
-                { new: true });
+                
 
-                // console.log("itemUpdated-->",itemUpdated);
+                if (!current.aiSearchkeywords) {
+                    const Synonymsresponse = await DeepseekSynonymsService(current.name);
+                    const updatedProduct=await ProductModel.findOneAndUpdate(
+                        { _id: current._id },
+                        { $set: { aiSearchkeywords: Synonymsresponse.synonyms } },
+                        { new: true }
+                    );
+                    console.log("Updated Product ai searchKeywords :", updatedProduct);
+                    changes.aiSearchkeywords = Synonymsresponse.synonyms;
+                }
 
+                
+                if (!current.aiFAQS) {
+                    const FAQresponse = await DeepseekFAQService(current.name);
+                    await ProductModel.findOneAndUpdate(
+                        { _id: current._id },
+                        { $set: { aiFAQS: FAQresponse.FAQs } },
+                        { new: true }
+                    );
+                    changes.aiFAQS = FAQresponse.FAQs;
+                }
 
-                results.push({ 
-                    productName: current.name, 
-                    aidescription:response.description,
-                    synonyms:response.synonyms,aiFAQs:FAQresponse.FAQs,
-                    aiNutrition:NutritonResponse?.nutritionalFacts,
-                    aiUses:HowtoUseBenefitsResponse.uses,
-                    aiBenefits:HowtoUseBenefitsResponse.benefits
-                 });
+                if (!current.aiNutritionFacts) {
+                    const NutritonResponse = await DeepseekNutritionService(current.name);
+                    await ProductModel.findOneAndUpdate(
+                        { _id: current._id },
+                        { $set: { aiNutritionFacts: NutritonResponse?.nutritional_facts } },
+                        { new: true }
+                    );
+                    changes.aiNutritionFacts = NutritonResponse?.nutritional_facts;
+                }
 
+                if (!current.aiUses) {
+                    const UsesResponse = await DeepSeekUsesService(current.name);
+                    await ProductModel.findOneAndUpdate(
+                        { _id: current._id },
+                        { $set: { aiUses: UsesResponse.uses } },
+                        { new: true }
+                    );
+                    changes.aiUses = UsesResponse.uses;
+                }
+
+                if (!current.aiBenefits) {
+                    const BenefitsResponse = await DeepSeekBenefitsService(current.name);
+                    await ProductModel.findOneAndUpdate(
+                        { _id: current._id },
+                        { $set: { aiBenefits: BenefitsResponse.benefits } },
+                        { new: true }
+                    );
+                    changes.aiBenefits = BenefitsResponse.benefits;
+                }
+
+                // Push the changes for the current product into the results array
+                results.push({
+                    productName: current.name,
+                    changes,
+                });
             } catch (err) {
-                throw new Error(err);
+                console.error(`Error processing product ${current.name}:`, err.message);
+
+                // Add the error to the results for tracking
+                results.push({
+                    productName: current.name,
+                    error: err.message,
+                });
             }
         }
 
         return res.json({
             status: "Success",
-            data: results
+            data: results,
         });
     } catch (err) {
         return res.status(500).json({
             status: "Unsuccess",
-            message: err.message
+            message: err.message,
         });
     }
 };
