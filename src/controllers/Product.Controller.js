@@ -25,7 +25,7 @@ export const ProductController = async (req, res) => {
 
         for (const current of productNamesAID) {
             try {
-                console.log("PRODUCT BEING PROCESSED", current);
+                console.log("PRODUCT BEING PROCESSED--->", current.name);
 
                 let changes = {}; // Initialize changes object for the current product
 
@@ -41,7 +41,7 @@ export const ProductController = async (req, res) => {
 
                 
 
-                if (!current.aiSearchkeywords?.length) {
+                if (!Array.isArray(current.aiSearchkeywords) || current.aiSearchkeywords.length === 0) {
                     const Synonymsresponse = await DeepseekSynonymsService(current.name);
                     
                     const updatedProduct=await ProductModel.findOneAndUpdate(
@@ -49,12 +49,12 @@ export const ProductController = async (req, res) => {
                         { $set: { aiSearchkeywords: Synonymsresponse.synonyms } },
                         { new: true }
                     );
-                    console.log("Updated Product ai searchKeywords :", updatedProduct);
+                    // console.log("Updated Product ai searchKeywords :", updatedProduct);
                     changes.aiSearchkeywords = Synonymsresponse.synonyms;
                 }
 
                 
-                if (!current.aiFAQS?.length) {
+                if (!Array.isArray(current.aiFAQS) || current.aiFAQS.length === 0) {
                     const FAQresponse = await DeepseekFAQService(current.name);
                     await ProductModel.findOneAndUpdate(
                         { _id: current._id },
@@ -64,7 +64,7 @@ export const ProductController = async (req, res) => {
                     changes.aiFAQS = FAQresponse.FAQs;
                 }
 
-                if (!current.aiNutritionFacts?.length) {
+                if (!Array.isArray(current.aiNutritionFacts) || current.aiNutritionFacts.length === 0) {
                     const NutritonResponse = await DeepseekNutritionService(current.name);
                     await ProductModel.findOneAndUpdate(
                         { _id: current._id },
