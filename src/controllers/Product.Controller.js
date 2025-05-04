@@ -41,8 +41,9 @@ export const ProductController = async (req, res) => {
 
                 
 
-                if (!current.aiSearchkeywords) {
+                if (!current.aiSearchkeywords?.length) {
                     const Synonymsresponse = await DeepseekSynonymsService(current.name);
+                    
                     const updatedProduct=await ProductModel.findOneAndUpdate(
                         { _id: current._id },
                         { $set: { aiSearchkeywords: Synonymsresponse.synonyms } },
@@ -53,7 +54,7 @@ export const ProductController = async (req, res) => {
                 }
 
                 
-                if (!current.aiFAQS) {
+                if (!current.aiFAQS?.length) {
                     const FAQresponse = await DeepseekFAQService(current.name);
                     await ProductModel.findOneAndUpdate(
                         { _id: current._id },
@@ -63,7 +64,7 @@ export const ProductController = async (req, res) => {
                     changes.aiFAQS = FAQresponse.FAQs;
                 }
 
-                if (!current.aiNutritionFacts) {
+                if (!current.aiNutritionFacts?.length) {
                     const NutritonResponse = await DeepseekNutritionService(current.name);
                     await ProductModel.findOneAndUpdate(
                         { _id: current._id },

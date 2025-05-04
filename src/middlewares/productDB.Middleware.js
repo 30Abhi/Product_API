@@ -10,7 +10,7 @@ export const productDBMiddleware = async (req, res, next) => {
       {}, 
       {}
     )
-      .limit(2); 
+      .limit(3); 
 
     console.log("PRODUCTS--->", products);
 

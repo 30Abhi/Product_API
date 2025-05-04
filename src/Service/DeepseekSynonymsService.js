@@ -58,6 +58,7 @@ export const DeepseekSynonymsService = async (productName) => {
     if (!payload.synonyms || !Array.isArray(payload.synonyms)) {
       throw new Error("DeepSeek response missing or invalid 'synonyms' array");
     }
+    // console.log("Updated Product ai searchKeywords :", payload.synonyms);
 
     return { synonyms: payload.synonyms };
   } catch (err) {
